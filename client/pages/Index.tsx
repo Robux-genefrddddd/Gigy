@@ -1,0 +1,200 @@
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { signOut } from "firebase/auth";
+import { auth, db } from "@/lib/firebase";
+import { doc, updateDoc } from "firebase/firestore";
+import { Sidebar } from "@/components/Sidebar";
+import { ChatArea } from "@/components/ChatArea";
+import { SystemNoticeModal } from "@/components/SystemNoticeModal";
+import { MessageLimitModal } from "@/components/MessageLimitModal";
+import { Menu, Loader2 } from "lucide-react";
+import { MessagesService } from "@/lib/messages";
+import { toast } from "sonner";
+
+export default function Index() {
+  const { loading, userBan, maintenanceNotice, user, userData } = useAuth();
+  const { isDark } = useTheme();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeConversationId, setActiveConversationId] = useState<string>();
+  const [acknowledgedMaintenance, setAcknowledgedMaintenance] = useState(false);
+
+  useEffect(() => {
+    // Load first conversation if available
+    if (user?.uid) {
+      loadFirstConversation();
+    }
+  }, [user?.uid]);
+
+  const loadFirstConversation = async () => {
+    if (!user?.uid) return;
+    try {
+      const conversations = await MessagesService.getConversations(user.uid);
+      if (conversations.length > 0) {
+        setActiveConversationId(conversations[0].id);
+      }
+    } catch (error) {
+      console.error("Error loading first conversation:", error);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+      }
+    }
+  };
+
+  useEffect(() => {
+    // If user is banned, log them out
+    if (userBan) {
+      signOut(auth).catch(console.error);
+    }
+  }, [userBan]);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-background items-center justify-center transition-colors duration-300">
+        <Loader2
+          className={`w-8 h-8 animate-spin transition-colors duration-300 ${
+            isDark ? "text-white" : "text-[#1A1A1A]"
+          }`}
+        />
+      </div>
+    );
+  }
+
+  // Show ban modal (non-dismissible, forces logout)
+  if (userBan) {
+    return (
+      <SystemNoticeModal
+        type="ban"
+        title="Compte banni"
+        message={`Votre compte a été banni pour la raison suivante: "${userBan.reason}"`}
+        severity="critical"
+        reason={userBan.reason}
+        expiresAt={userBan.expiresAt ? userBan.expiresAt.toDate() : undefined}
+        dismissible={false}
+      />
+    );
+  }
+
+  // Show message limit modal (non-dismissible)
+  if (userData && userData.messagesUsed >= userData.messagesLimit) {
+    return (
+      <MessageLimitModal
+        messagesUsed={userData.messagesUsed}
+        messagesLimit={userData.messagesLimit}
+      />
+    );
+  }
+
+  // Show maintenance modal (critical = non-dismissible and blocks app)
+  if (maintenanceNotice) {
+    return (
+      <SystemNoticeModal
+        type="maintenance"
+        title={maintenanceNotice.title}
+        message={maintenanceNotice.message}
+        severity={maintenanceNotice.severity}
+        onAcknowledge={
+          maintenanceNotice.severity === "critical"
+            ? undefined
+            : () => setAcknowledgedMaintenance(true)
+        }
+        dismissible={maintenanceNotice.severity !== "critical"}
+      />
+    );
+  }
+
+  return (
+    <div className="flex h-screen bg-transparent">
+      {/* Sidebar - Hidden by default, opens as drawer on hamburger click */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        activeConversationId={activeConversationId}
+        onConversationSelect={setActiveConversationId}
+      />
+
+      {/* Main Content - Full width */}
+      <div className="flex-1 flex flex-col">
+        {/* Header with Menu Button */}
+        <div
+          className={`border-b px-3 py-2 flex items-center justify-between backdrop-blur-sm transition-all duration-300 relative ${
+            isDark
+              ? "border-white/10 bg-gradient-to-b from-[#0e0e0e]/80 to-transparent"
+              : "border-black/[0.08] bg-gradient-to-b from-[#F3F4F6]/80 to-transparent"
+          }`}
+          style={{
+            background: isDark
+              ? "linear-gradient(180deg, rgba(14,14,14,0.95) 0%, rgba(14,14,14,0.8) 100%)"
+              : "linear-gradient(180deg, rgba(243,244,246,0.95) 0%, rgba(243,244,246,0.8) 100%)",
+          }}
+        >
+          {/* Gradient underline */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-px"
+            style={{
+              background: isDark
+                ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)"
+                : "linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent)",
+            }}
+          />
+
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className={`p-2 rounded-lg transition-all duration-300 group relative z-10 ${
+              isDark
+                ? "hover:bg-white/10 text-white/70 hover:text-white"
+                : "hover:bg-black/[0.08] text-[#3F3F3F]/70 hover:text-[#1A1A1A]"
+            }`}
+            aria-label="Toggle Menu"
+            title="Toggle Menu"
+          >
+            <div className="flex flex-col gap-1.5 w-5 h-5">
+              <span
+                className={`w-full h-0.5 transition-all duration-300 rounded-full ${
+                  isDark
+                    ? "bg-white/70 group-hover:bg-white"
+                    : "bg-[#3F3F3F]/70 group-hover:bg-[#1A1A1A]"
+                }`}
+              />
+              <span
+                className={`w-full h-0.5 transition-all duration-300 rounded-full ${
+                  isDark
+                    ? "bg-white/70 group-hover:bg-white"
+                    : "bg-[#3F3F3F]/70 group-hover:bg-[#1A1A1A]"
+                }`}
+              />
+              <span
+                className={`w-full h-0.5 transition-all duration-300 rounded-full ${
+                  isDark
+                    ? "bg-white/70 group-hover:bg-white"
+                    : "bg-[#3F3F3F]/70 group-hover:bg-[#1A1A1A]"
+                }`}
+              />
+            </div>
+          </button>
+
+          <div className="absolute left-1/2 transform -translate-x-1/2 z-10">
+            <h1
+              className={`text-sm font-semibold transition-all duration-300 ${
+                isDark ? "text-white/80" : "text-[#3F3F3F]/80"
+              }`}
+              style={{
+                letterSpacing: "0.5px",
+                textShadow: isDark
+                  ? "0 2px 8px rgba(0,0,0,0.4)"
+                  : "0 1px 4px rgba(0,0,0,0.08)",
+              }}
+            >
+              VanIA
+            </h1>
+          </div>
+
+          <div className="w-10" />
+        </div>
+
+        {/* Chat Area */}
+        <ChatArea conversationId={activeConversationId} />
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,511 @@
+/** @import must precede all other statements */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /**
+   * Premium Dark Theme - ChatGPT + Notion + Linear inspired
+   * Elegant, professional, minimal, without feeling too "AI"
+  */
+  :root {
+    --background: 0 0% 5%;
+    --foreground: 0 0% 95%;
+
+    --card: 217 33% 12%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 217 33% 12%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 219 100% 63%;
+    --primary-foreground: 0 0% 5%;
+
+    --secondary: 217 33% 15%;
+    --secondary-foreground: 0 0% 90%;
+
+    --muted: 217 33% 25%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 219 100% 63%;
+    --accent-foreground: 0 0% 5%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 95%;
+
+    --border: 217 33% 15%;
+    --input: 217 33% 15%;
+    --ring: 219 100% 63%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 219 100% 63%;
+    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-accent: 217 33% 18%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 217 33% 15%;
+    --sidebar-ring: 219 100% 63%;
+  }
+
+  .dark {
+    --background: 0 0% 5%;
+    --foreground: 0 0% 95%;
+
+    --card: 217 33% 12%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 217 33% 12%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 219 100% 63%;
+    --primary-foreground: 0 0% 5%;
+
+    --secondary: 217 33% 15%;
+    --secondary-foreground: 0 0% 90%;
+
+    --muted: 217 33% 25%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 219 100% 63%;
+    --accent-foreground: 0 0% 5%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 95%;
+
+    --border: 217 33% 15%;
+    --input: 217 33% 15%;
+    --ring: 219 100% 63%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 219 100% 63%;
+    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-accent: 217 33% 18%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 217 33% 15%;
+    --sidebar-ring: 219 100% 63%;
+  }
+
+  /* Soft Light Theme - Notion style, not aggressive white */
+  :root:not(.dark) {
+    --background: 243 7% 96%;
+    --foreground: 0 0% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+
+    --primary: 219 100% 48%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 33% 91%;
+    --secondary-foreground: 0 0% 25%;
+
+    --muted: 217 33% 75%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 219 100% 48%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 0% / 0.08;
+    --input: 0 0% 100%;
+    --ring: 219 100% 48%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 15%;
+    --sidebar-primary: 219 100% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 33% 90%;
+    --sidebar-accent-foreground: 0 0% 20%;
+    --sidebar-border: 0 0% 0% / 0.08;
+    --sidebar-ring: 219 100% 48%;
+  }
+}
+
+@layer base {
+  html {
+    @apply dark;
+  }
+
+  /* Smooth theme transition */
+  * {
+    @apply border-border;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease,
+      border-color 0.3s ease;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    position: relative;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' seed='2' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  body.dark {
+    background: #090909;
+  }
+
+  body:not(.dark) {
+    background-image: linear-gradient(135deg, #f3f4f6 0%, #fafafa 100%);
+  }
+
+  :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  pre,
+  code {
+    overflow-x: auto;
+    white-space: pre;
+  }
+}
+
+@layer utilities {
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes glowPulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(76, 140, 245, 0);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(76, 140, 245, 0.05);
+    }
+  }
+
+  @keyframes softGlow {
+    0%,
+    100% {
+      box-shadow: 0 0 12px rgba(255, 200, 100, 0.1);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(255, 200, 100, 0.2);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  @keyframes springFade {
+    0% {
+      opacity: 0;
+      transform: translateY(8px) scale(0.92);
+    }
+    70% {
+      opacity: 1;
+      transform: translateY(-2px) scale(1.02);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes messageFadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes threeDotPulse {
+    0%,
+    60%,
+    100% {
+      opacity: 0.4;
+      transform: translateY(0);
+    }
+    30% {
+      opacity: 1;
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes iMessageDots {
+    0%,
+    20% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    50%,
+    100% {
+      opacity: 0.3;
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes blockSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(4px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes messageInputSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes haloPulse {
+    0%,
+    100% {
+      filter: drop-shadow(0 0 8px rgba(255, 200, 100, 0.15));
+    }
+    50% {
+      filter: drop-shadow(0 0 16px rgba(255, 200, 100, 0.25));
+    }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  .animate-slideUp {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-slideInLeft {
+    animation: slideInLeft 0.3s ease-out;
+  }
+
+  .animate-scaleIn {
+    animation: scaleIn 0.3s ease-out;
+  }
+
+  .animate-glowPulse {
+    animation: glowPulse 2s infinite;
+  }
+
+  .animate-softGlow {
+    animation: softGlow 3s ease-in-out infinite;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    background-size: 1000px 100%;
+  }
+
+  .animate-springFade {
+    animation: springFade 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .animate-messageFadeUp {
+    animation: messageFadeUp 180ms ease-out;
+  }
+
+  .animate-threeDotPulse {
+    animation: threeDotPulse 1.4s infinite;
+  }
+
+  .animate-iMessageDots {
+    animation: iMessageDots 1s ease-in-out infinite;
+  }
+
+  .animate-blockSlideUp {
+    animation: blockSlideUp 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .animate-haloPulse {
+    animation: haloPulse 2.5s ease-in-out infinite;
+  }
+
+  /* Smooth scrolling with iOS-like friction */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Dark mode scrollbar */
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  .dark ::-webkit-scrollbar-thumb:active {
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  /* Light mode scrollbar */
+  :root:not(.dark) ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+  }
+
+  :root:not(.dark) ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  :root:not(.dark) ::-webkit-scrollbar-thumb:active {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  /* Firefox - Dark mode */
+  .dark {
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    scrollbar-width: thin;
+  }
+
+  .dark:hover {
+    scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+  }
+
+  /* Firefox - Light mode */
+  :root:not(.dark) {
+    scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
+    scrollbar-width: thin;
+  }
+
+  :root:not(.dark):hover {
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+
+  /* Glassmorphism effect */
+  .glass-effect {
+    @apply backdrop-blur-md bg-white/[0.05] border border-white/[0.1];
+  }
+
+  /* Subtle hover lift */
+  .hover-lift {
+    @apply transition-all duration-200 hover:-translate-y-0.5;
+  }
+
+  /* Premium button style */
+  .btn-premium {
+    @apply px-4 py-2.5 rounded-lg font-medium transition-all duration-200 text-sm;
+    @apply hover:scale-105 active:scale-95;
+  }
+
+  /* Message bubble base */
+  .message-bubble {
+    @apply rounded-xl px-4 py-3 text-sm leading-relaxed break-words max-w-xs sm:max-w-sm md:max-w-lg shadow-sm;
+  }
+
+  /* User message bubble */
+  .message-bubble-user {
+    @apply message-bubble bg-gradient-to-br from-blue-600 to-blue-700 text-white;
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    @apply shadow-lg;
+  }
+
+  /* AI message bubble */
+  .message-bubble-ai {
+    @apply message-bubble bg-gray-700/60 text-gray-100;
+    background-color: rgb(31, 41, 55, 0.6);
+    @apply border border-white/[0.08];
+  }
+
+  /* Premium message input */
+  #message-input {
+    caret-color: #3b82f6;
+  }
+
+  #message-input::placeholder {
+    color: #8b8b8b;
+  }
+
+  .dark #message-input::placeholder {
+    color: #7a7a7a;
+  }
+}

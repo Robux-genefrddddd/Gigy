@@ -1,0 +1,156 @@
+import { auth } from "@/lib/firebase";
+
+export interface AIConfig {
+  model: string;
+  temperature: number;
+  maxTokens: number;
+}
+
+const DEFAULT_CONFIG: AIConfig = {
+  model: "x-ai/grok-4.1-fast:free",
+  temperature: 0.7,
+  maxTokens: 2048,
+};
+
+export class AIService {
+  static async getConfig(): Promise<AIConfig> {
+    try {
+      const response = await fetch("/api/ai/config");
+      if (!response.ok) {
+        console.debug("Failed to fetch AI config, using default");
+        return DEFAULT_CONFIG;
+      }
+      return await response.json();
+    } catch (error) {
+      console.debug("Error fetching AI config, using default:", error);
+      return DEFAULT_CONFIG;
+    }
+  }
+
+  static async updateConfig(config: Partial<AIConfig>): Promise<void> {
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) {
+        throw new Error("Not authenticated");
+      }
+
+      const response = await fetch("/api/ai/config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          idToken,
+          ...config,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update AI config");
+      }
+    } catch (error) {
+      throw new Error("Erreur lors de la mise à jour de la configuration IA");
+    }
+  }
+
+  static async sendMessage(
+    userMessage: string,
+    conversationHistory: Array<{ role: string; content: string }> = [],
+  ): Promise<string> {
+    const config = await this.getConfig();
+
+    try {
+      // Get current user's ID token
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) {
+        throw new Error("Not authenticated. Please log in again.");
+      }
+
+      let response: Response;
+      try {
+        response = await fetch("/api/ai/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            idToken,
+            userMessage,
+            conversationHistory,
+            model: config.model,
+            temperature: config.temperature,
+            maxTokens: config.maxTokens,
+          }),
+        });
+      } catch (fetchError) {
+        console.error("Fetch request failed:", fetchError);
+        throw new Error("Erreur réseau: impossible de contacter le serveur");
+      }
+
+      // Check if response exists and has a body
+      if (!response || !response.body) {
+        console.error("Response has no body");
+        throw new Error("Erreur serveur: pas de réponse");
+      }
+
+      // Read response status first (doesn't consume body)
+      const status = response.status;
+      const ok = response.ok;
+
+      // Now read the body
+      let responseText: string;
+      try {
+        responseText = await response.text();
+      } catch (readError) {
+        console.error("Failed to read response body:", readError);
+        // Try to provide more info
+        if (
+          readError instanceof TypeError &&
+          readError.message.includes("body stream already read")
+        ) {
+          console.warn(
+            "Response body was already consumed - possible middleware interference",
+          );
+        }
+        throw new Error("Erreur serveur: impossible de lire la réponse");
+      }
+
+      // Validate we got some response
+      if (!responseText) {
+        console.error("Response text is empty");
+        throw new Error("Erreur serveur: réponse vide");
+      }
+
+      // Parse JSON from text
+      let data: any;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("Failed to parse JSON:", parseError);
+        console.error("Response text:", responseText.substring(0, 500));
+        throw new Error("Erreur serveur: réponse invalide");
+      }
+
+      // Check HTTP status
+      if (!ok) {
+        const errorMessage = data?.error || `API error: ${status}`;
+        throw new Error(errorMessage);
+      }
+
+      return data.content || "Pas de réponse";
+    } catch (error) {
+      throw error instanceof Error
+        ? error
+        : new Error("Erreur lors de la requête IA");
+    }
+  }
+
+  static getAvailableModels(): string[] {
+    return [
+      "openrouter/auto",
+      "gpt-4-turbo-preview",
+      "gpt-3.5-turbo",
+      "claude-3-opus",
+      "claude-3-sonnet",
+      "mistral-large",
+    ];
+  }
+}
