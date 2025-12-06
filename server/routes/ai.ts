@@ -264,7 +264,7 @@ export const handleGetAIConfig: RequestHandler = async (req, res) => {
     const db = getAdminDb();
     if (!db) {
       return res.json({
-        model: "x-ai/grok-4.1-fast:free",
+        model: "amazon/nova-2-lite-v1:free",
         temperature: 0.7,
         maxTokens: 2048,
       });
@@ -274,7 +274,7 @@ export const handleGetAIConfig: RequestHandler = async (req, res) => {
     const config = configDoc.exists ? configDoc.data() : {};
 
     return res.json({
-      model: config.model || "x-ai/grok-4.1-fast:free",
+      model: config.model || "amazon/nova-2-lite-v1:free",
       temperature: config.temperature || 0.7,
       maxTokens: config.maxTokens || 2048,
     });
