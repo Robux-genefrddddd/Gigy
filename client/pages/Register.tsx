@@ -78,7 +78,6 @@ export default function Register() {
 
     // Check TOS acceptance
     if (!tosAccepted) {
-      setShowTOSModal(true);
       toast.error("Vous devez accepter les conditions d'utilisation");
       return;
     }
