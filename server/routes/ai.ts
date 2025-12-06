@@ -11,7 +11,7 @@ export const handleAIChat: RequestHandler = async (req, res) => {
       idToken,
       userMessage,
       conversationHistory = [],
-      model = "amazon/nova-2-lite-v1:free",
+      model = "google/gemma-3-27b-it:free",
       temperature = 0.7,
       maxTokens = 2048,
     } = validated;
@@ -108,6 +108,7 @@ export const handleAIChat: RequestHandler = async (req, res) => {
 
     // Validate model is allowed
     const allowedModels = [
+      "google/gemma-3-27b-it:free",
       "amazon/nova-2-lite-v1:free",
       "x-ai/grok-4.1-fast:free",
       "gpt-4",
@@ -264,7 +265,7 @@ export const handleGetAIConfig: RequestHandler = async (req, res) => {
     const db = getAdminDb();
     if (!db) {
       return res.json({
-        model: "amazon/nova-2-lite-v1:free",
+        model: "google/gemma-3-27b-it:free",
         temperature: 0.7,
         maxTokens: 2048,
       });
@@ -274,7 +275,7 @@ export const handleGetAIConfig: RequestHandler = async (req, res) => {
     const config = configDoc.exists ? configDoc.data() : {};
 
     return res.json({
-      model: config.model || "amazon/nova-2-lite-v1:free",
+      model: config.model || "google/gemma-3-27b-it:free",
       temperature: config.temperature || 0.7,
       maxTokens: config.maxTokens || 2048,
     });
