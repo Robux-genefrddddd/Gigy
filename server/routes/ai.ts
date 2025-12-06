@@ -48,17 +48,43 @@ export const handleAIChat: RequestHandler = async (req, res) => {
     const userDocRef = db.collection("users").doc(userId);
     const userDocSnap = await userDocRef.get();
 
-    if (!userDocSnap.exists) {
-      return res.status(404).json({
-        error: "User not found",
-      });
-    }
+    let userData: any;
 
-    const userData = userDocSnap.data();
-    if (!userData) {
-      return res.status(404).json({
-        error: "User data not found",
-      });
+    if (!userDocSnap.exists) {
+      // Auto-create user document if it doesn't exist (handles partial registration failures)
+      console.warn(
+        `User document not found for ${userId}. Creating with default settings.`,
+      );
+
+      const defaultUserData = {
+        uid: userId,
+        email: decoded.email || "",
+        displayName: decoded.email?.split("@")[0] || "User",
+        plan: "Free",
+        role: "user",
+        category: "individual",
+        messagesUsed: 0,
+        messagesLimit: 10,
+        createdAt: Date.now(),
+        isAdmin: false,
+      };
+
+      try {
+        await userDocRef.set(defaultUserData);
+        userData = defaultUserData;
+      } catch (createError) {
+        console.error("Failed to create user document:", createError);
+        return res.status(500).json({
+          error: "Failed to initialize user profile. Please try again.",
+        });
+      }
+    } else {
+      userData = userDocSnap.data();
+      if (!userData) {
+        return res.status(404).json({
+          error: "User data not found",
+        });
+      }
     }
 
     // Check if user has credits
