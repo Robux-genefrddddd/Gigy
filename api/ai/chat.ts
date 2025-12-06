@@ -51,7 +51,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           "X-Title": "Chat AI",
         },
         body: JSON.stringify({
-          model: model || "google/gemma-3-27b-it:free",
+          model: model || "mistralai/mistral-7b-instruct:free",
           messages: [
             {
               role: "system",

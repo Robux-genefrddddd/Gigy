@@ -565,7 +565,7 @@ export class FirebaseAdminService {
 
     if (!doc.exists) {
       return {
-        model: "google/gemma-3-27b-it:free",
+        model: "mistralai/mistral-7b-instruct:free",
         temperature: 0.7,
         maxTokens: 2048,
         systemPrompt:

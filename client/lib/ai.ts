@@ -7,7 +7,7 @@ export interface AIConfig {
 }
 
 const DEFAULT_CONFIG: AIConfig = {
-  model: "google/gemma-3-27b-it:free",
+  model: "mistralai/mistral-7b-instruct:free",
   temperature: 0.7,
   maxTokens: 2048,
 };
