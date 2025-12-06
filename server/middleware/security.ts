@@ -382,6 +382,7 @@ export const AIChatSchema = z.object({
     .default([]),
   model: z
     .enum([
+      "amazon/nova-2-lite-v1:free",
       "x-ai/grok-4.1-fast:free",
       "gpt-4",
       "gpt-3.5-turbo",
@@ -389,7 +390,7 @@ export const AIChatSchema = z.object({
       "claude-3-sonnet",
     ])
     .optional()
-    .default("x-ai/grok-4.1-fast:free"),
+    .default("amazon/nova-2-lite-v1:free"),
   temperature: z.number().min(0).max(2).optional().default(0.7),
   maxTokens: z.number().int().min(1).max(4096).optional().default(2048),
 });
