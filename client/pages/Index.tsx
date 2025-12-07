@@ -195,7 +195,10 @@ export default function Index() {
         </div>
 
         {/* Chat Area */}
-        <ChatArea conversationId={activeConversationId} />
+        <ChatArea
+          conversationId={activeConversationId}
+          onConversationCreate={setActiveConversationId}
+        />
       </div>
     </div>
   );
