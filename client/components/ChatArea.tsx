@@ -328,6 +328,19 @@ export function ChatArea({
     if (isImage) setGeneratingImage(true);
 
     try {
+      // Handle temporary conversation creation
+      let finalConversationId = conversationId;
+      if (conversationId.startsWith("temp_")) {
+        // Create conversation in Firebase if it's temporary
+        const conversationRef = await MessagesService.createConversation(
+          user.uid,
+          generateConversationTitle(userMessageText),
+        );
+        finalConversationId = conversationRef.id;
+        // Notify parent component about the new conversation ID
+        onConversationCreate?.(finalConversationId);
+      }
+
       // Add user message to chat
       const userMsg: ChatMessage = {
         id: Date.now().toString(),
@@ -339,7 +352,7 @@ export function ChatArea({
 
       // Save user message to Firebase
       await MessagesService.addMessage(
-        conversationId,
+        finalConversationId,
         user.uid,
         `user:${userMessageText}`,
       );
