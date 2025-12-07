@@ -249,13 +249,7 @@ export function ChatArea({
         saveMessage();
       }
     }
-  }, [
-    isTyping,
-    isRenderingBlocks,
-    fullText,
-    user,
-    chatMessages,
-  ]);
+  }, [isTyping, isRenderingBlocks, fullText, user, chatMessages]);
 
   const loadMessages = async () => {
     if (!conversationId) return;

@@ -25,7 +25,7 @@ export function initializeFirebaseAdmin() {
       } catch (parseError) {
         console.error(
           "CRITICAL: Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY JSON",
-          parseError instanceof Error ? parseError.message : "Unknown error"
+          parseError instanceof Error ? parseError.message : "Unknown error",
         );
         throw new Error("Invalid FIREBASE_SERVICE_ACCOUNT_KEY JSON format");
       }
@@ -85,7 +85,7 @@ export function initializeFirebaseAdmin() {
   } catch (error) {
     console.error(
       "❌ Failed to initialize Firebase Admin SDK:",
-      error instanceof Error ? error.message : error
+      error instanceof Error ? error.message : error,
     );
     initialized = false;
     adminDb = null;
