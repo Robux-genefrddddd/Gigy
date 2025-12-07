@@ -115,6 +115,8 @@ export default function Index() {
 
       {/* Main Content - Full width */}
       <div className="flex-1 flex flex-col">
+        {/* Handle conversation creation */}
+        {/* When a new conversation is created in ChatArea, update the active conversation */}
         {/* Header with Menu Button */}
         <div
           className={`border-b px-3 py-2 flex items-center justify-between backdrop-blur-sm transition-all duration-300 relative ${
@@ -193,7 +195,10 @@ export default function Index() {
         </div>
 
         {/* Chat Area */}
-        <ChatArea conversationId={activeConversationId} />
+        <ChatArea
+          conversationId={activeConversationId}
+          onConversationCreate={setActiveConversationId}
+        />
       </div>
     </div>
   );

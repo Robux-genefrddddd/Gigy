@@ -17,12 +17,17 @@ export function initializeFirebaseAdmin() {
     let serviceAccount: any;
 
     const fullJson = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+
     if (fullJson) {
       try {
         serviceAccount = JSON.parse(fullJson);
-      } catch {
-        console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY JSON");
-        return;
+        console.log("Firebase: Loaded from FIREBASE_SERVICE_ACCOUNT_KEY");
+      } catch (parseError) {
+        console.error(
+          "CRITICAL: Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY JSON",
+          parseError instanceof Error ? parseError.message : "Unknown error",
+        );
+        throw new Error("Invalid FIREBASE_SERVICE_ACCOUNT_KEY JSON format");
       }
     } else {
       // Build service account from individual environment variables
@@ -32,25 +37,17 @@ export function initializeFirebaseAdmin() {
       const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
       const clientId = process.env.FIREBASE_CLIENT_ID;
 
-      if (
-        !projectId ||
-        !privateKeyId ||
-        !privateKey ||
-        !clientEmail ||
-        !clientId
-      ) {
-        console.error(
-          "CRITICAL: Firebase service account credentials not configured.",
-        );
-        console.error(
-          "Set either FIREBASE_SERVICE_ACCOUNT_KEY (full JSON) or these individual variables:",
-        );
-        console.error("  - FIREBASE_PROJECT_ID");
-        console.error("  - FIREBASE_PRIVATE_KEY_ID");
-        console.error("  - FIREBASE_PRIVATE_KEY");
-        console.error("  - FIREBASE_CLIENT_EMAIL");
-        console.error("  - FIREBASE_CLIENT_ID");
-        return;
+      const missing = [];
+      if (!projectId) missing.push("FIREBASE_PROJECT_ID");
+      if (!privateKeyId) missing.push("FIREBASE_PRIVATE_KEY_ID");
+      if (!privateKey) missing.push("FIREBASE_PRIVATE_KEY");
+      if (!clientEmail) missing.push("FIREBASE_CLIENT_EMAIL");
+      if (!clientId) missing.push("FIREBASE_CLIENT_ID");
+
+      if (missing.length > 0) {
+        const msg = `CRITICAL: Firebase service account credentials not configured. Missing: ${missing.join(", ")}`;
+        console.error(msg);
+        throw new Error(msg);
       }
 
       serviceAccount = {
@@ -65,25 +62,34 @@ export function initializeFirebaseAdmin() {
         auth_provider_x509_cert_url:
           "https://www.googleapis.com/oauth2/v1/certs",
       };
+      console.log("Firebase: Loaded from individual environment variables");
     }
 
     let app;
     if (getApps().length > 0) {
       app = getApp();
+      console.log("Firebase: Using existing app instance");
     } else {
       app = initializeApp({
         credential: cert(serviceAccount),
         projectId: serviceAccount.project_id,
       });
+      console.log("Firebase: Initialized new app instance");
     }
 
     adminDb = getFirestore(app);
     adminAuth = getAuth(app);
     initialized = true;
 
-    console.log("Firebase Admin SDK initialized securely");
+    console.log("✅ Firebase Admin SDK initialized securely");
   } catch (error) {
-    console.error("Failed to initialize Firebase Admin SDK:", error);
+    console.error(
+      "❌ Failed to initialize Firebase Admin SDK:",
+      error instanceof Error ? error.message : error,
+    );
+    initialized = false;
+    adminDb = null;
+    adminAuth = null;
     throw error;
   }
 }

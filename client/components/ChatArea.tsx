@@ -54,9 +54,15 @@ export function ChatArea({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const blockIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const actualConversationIdRef = useRef<string>(conversationId);
 
   // Rate limiter: max 30 messages per minute
   const messageRateLimiter = useRef(new RateLimiter("send_message", 30, 60000));
+
+  // Update the actual conversation ID ref whenever it changes
+  useEffect(() => {
+    actualConversationIdRef.current = conversationId;
+  }, [conversationId]);
 
   const getCharacterDelay = (char: string, nextChar?: string): number => {
     const baseDelay = 20;
@@ -201,7 +207,6 @@ export function ChatArea({
       !isTyping &&
       !isRenderingBlocks &&
       fullText &&
-      conversationId &&
       user &&
       chatMessages.length > 0
     ) {
@@ -221,12 +226,15 @@ export function ChatArea({
               return updated;
             });
 
-            // Save to Firebase
-            await MessagesService.addMessage(
-              conversationId,
-              user.uid,
-              `assistant:${fullText}`,
-            );
+            // Save to Firebase using the actual conversation ID
+            const finalConvId = actualConversationIdRef.current;
+            if (finalConvId && !finalConvId.startsWith("temp_")) {
+              await MessagesService.addMessage(
+                finalConvId,
+                user.uid,
+                `assistant:${fullText}`,
+              );
+            }
 
             // Reset states
             setTypingText("");
@@ -241,14 +249,7 @@ export function ChatArea({
         saveMessage();
       }
     }
-  }, [
-    isTyping,
-    isRenderingBlocks,
-    fullText,
-    conversationId,
-    user,
-    chatMessages,
-  ]);
+  }, [isTyping, isRenderingBlocks, fullText, user, chatMessages]);
 
   const loadMessages = async () => {
     if (!conversationId) return;
@@ -328,6 +329,19 @@ export function ChatArea({
     if (isImage) setGeneratingImage(true);
 
     try {
+      // Handle temporary conversation creation
+      let finalConversationId = conversationId;
+      if (conversationId.startsWith("temp_")) {
+        // Create conversation in Firebase if it's temporary
+        const conversationRef = await MessagesService.createConversation(
+          user.uid,
+          generateConversationTitle(userMessageText),
+        );
+        finalConversationId = conversationRef.id;
+        // Notify parent component about the new conversation ID
+        onConversationCreate?.(finalConversationId);
+      }
+
       // Add user message to chat
       const userMsg: ChatMessage = {
         id: Date.now().toString(),
@@ -339,7 +353,7 @@ export function ChatArea({
 
       // Save user message to Firebase
       await MessagesService.addMessage(
-        conversationId,
+        finalConversationId,
         user.uid,
         `user:${userMessageText}`,
       );
@@ -360,12 +374,12 @@ export function ChatArea({
 
         // Save assistant message to Firebase
         await MessagesService.addMessage(
-          conversationId,
+          finalConversationId,
           user.uid,
           `assistant:${assistantContent}`,
         );
 
-        toast.success("Image g��nérée avec succès!");
+        toast.success("Image générée avec succès!");
       } else {
         // Get AI response for normal chat
         const conversationHistory = chatMessages.map((msg) => ({
