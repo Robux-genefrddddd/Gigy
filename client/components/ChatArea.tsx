@@ -207,7 +207,6 @@ export function ChatArea({
       !isTyping &&
       !isRenderingBlocks &&
       fullText &&
-      conversationId &&
       user &&
       chatMessages.length > 0
     ) {
@@ -227,12 +226,15 @@ export function ChatArea({
               return updated;
             });
 
-            // Save to Firebase
-            await MessagesService.addMessage(
-              conversationId,
-              user.uid,
-              `assistant:${fullText}`,
-            );
+            // Save to Firebase using the actual conversation ID
+            const finalConvId = actualConversationIdRef.current;
+            if (finalConvId && !finalConvId.startsWith("temp_")) {
+              await MessagesService.addMessage(
+                finalConvId,
+                user.uid,
+                `assistant:${fullText}`,
+              );
+            }
 
             // Reset states
             setTypingText("");
@@ -251,7 +253,6 @@ export function ChatArea({
     isTyping,
     isRenderingBlocks,
     fullText,
-    conversationId,
     user,
     chatMessages,
   ]);
