@@ -373,12 +373,12 @@ export function ChatArea({
 
         // Save assistant message to Firebase
         await MessagesService.addMessage(
-          conversationId,
+          finalConversationId,
           user.uid,
           `assistant:${assistantContent}`,
         );
 
-        toast.success("Image g��nérée avec succès!");
+        toast.success("Image générée avec succès!");
       } else {
         // Get AI response for normal chat
         const conversationHistory = chatMessages.map((msg) => ({
