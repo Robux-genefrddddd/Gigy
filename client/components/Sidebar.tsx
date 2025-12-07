@@ -79,6 +79,18 @@ export function Sidebar({
     }
   }, [user?.uid]);
 
+  // When active conversation ID changes, update the list
+  useEffect(() => {
+    if (activeConversationId && conversations.length > 0) {
+      // Check if the active conversation exists in the list
+      const exists = conversations.some((conv) => conv.id === activeConversationId);
+      // If a new real conversation ID was set, reload the conversations
+      if (!exists && !activeConversationId.startsWith("temp_")) {
+        loadConversations();
+      }
+    }
+  }, [activeConversationId]);
+
   const loadConversations = async () => {
     if (!user?.uid) return;
     try {
