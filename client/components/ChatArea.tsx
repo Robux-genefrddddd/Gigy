@@ -54,9 +54,15 @@ export function ChatArea({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const blockIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const actualConversationIdRef = useRef<string>(conversationId);
 
   // Rate limiter: max 30 messages per minute
   const messageRateLimiter = useRef(new RateLimiter("send_message", 30, 60000));
+
+  // Update the actual conversation ID ref whenever it changes
+  useEffect(() => {
+    actualConversationIdRef.current = conversationId;
+  }, [conversationId]);
 
   const getCharacterDelay = (char: string, nextChar?: string): number => {
     const baseDelay = 20;
